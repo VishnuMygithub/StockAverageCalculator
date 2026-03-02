@@ -544,6 +544,75 @@
       0%, 100% { opacity: 1; }
       50%       { opacity: 0.3; }
     }
+
+    /* ── Accordion ── */
+    .accordion-card {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .accordion-header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 1.75rem;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--text);
+      font-family: 'Sora', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      text-align: left;
+      gap: 0.75rem;
+      transition: background 0.18s;
+    }
+
+    .accordion-header:hover {
+      background: var(--surface2);
+    }
+
+    .accordion-header span:first-child {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .chevron {
+      font-size: 1.1rem;
+      color: var(--accent);
+      transition: transform 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .accordion-header.open .chevron {
+      transform: rotate(180deg);
+    }
+
+    .accordion-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.3s ease;
+      padding: 0 1.75rem;
+    }
+
+    .accordion-body.open {
+      max-height: 1000px;
+      padding: 0 1.75rem 1.5rem;
+    }
+
+    .accordion-body p {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.75;
+      font-weight: 300;
+    }
+
+    .accordion-body p strong {
+      color: var(--text);
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
@@ -605,28 +674,43 @@
 <!-- Info Section -->
 <div class="info-section">
 
-  <div class="info-card">
-    <h2><span class="icon">📖</span> What is the Stock Average Calculator?</h2>
-    <p>
-      The Stock Average Calculator is a valuable tool for investors looking to manage their portfolio effectively.
-      It calculates your <strong>weighted average cost per share</strong> across multiple purchase lots, giving you
-      a clear picture of your actual cost basis — and helping you make smarter decisions about when and how much to buy.
-    </p>
+  <div class="info-card accordion-card">
+    <button class="accordion-header" onclick="toggleAccordion(this)">
+      <span><span class="icon">📖</span> What is the Stock Average Calculator?</span>
+      <span class="chevron">▾</span>
+    </button>
+    <div class="accordion-body">
+      <p>
+        The Stock Average Calculator is a valuable tool for investors looking to manage their portfolio effectively.
+        It calculates your <strong>weighted average cost per share</strong> across multiple purchase lots, giving you
+        a clear picture of your actual cost basis — and helping you make smarter decisions about when and how much to buy.
+      </p>
+    </div>
   </div>
 
-  <div class="info-card">
-    <h2><span class="icon">💡</span> Why Use It?</h2>
-    <p>
-      As an investor, you may encounter situations where a stock's price moves <strong>contrary to your expectations</strong>.
-      For example, say you bought Reliance stocks anticipating an upward trend — but the market moves downward.
-      If your conviction in the stock remains strong, you can strategically <strong>buy more shares at the lower price</strong>
-      to bring down your average cost per share. This approach is known as <strong>averaging down</strong>, and this
-      calculator makes it precise and effortless.
-    </p>
+  <div class="info-card accordion-card">
+    <button class="accordion-header" onclick="toggleAccordion(this)">
+      <span><span class="icon">💡</span> Why Use It?</span>
+      <span class="chevron">▾</span>
+    </button>
+    <div class="accordion-body">
+      <p>
+        As an investor, you may encounter situations where a stock's price moves <strong>contrary to your expectations</strong>.
+        For example, say you bought Reliance stocks anticipating an upward trend — but the market moves downward.
+        If your conviction in the stock remains strong, you can strategically <strong>buy more shares at the lower price</strong>
+        to bring down your average cost per share. This approach is known as <strong>averaging down</strong>, and this
+        calculator makes it precise and effortless.
+      </p>
+    </div>
   </div>
 
-  <div class="info-card">
-    <h2><span class="icon">🪜</span> How to Use</h2>
+  <div class="info-card accordion-card">
+    <button class="accordion-header" onclick="toggleAccordion(this)">
+      <span><span class="icon">🪜</span> How to Use</span>
+      <span class="chevron">▾</span>
+    </button>
+    <div class="accordion-body">
+    <h2 style="display:none"></h2>
     <div class="steps">
       <div class="step">
         <div class="step-num">1</div>
@@ -669,6 +753,7 @@
       <div class="callout-icon">⚠️</div>
       <p><strong>A word of caution:</strong> Averaging down can be a powerful strategy, but it also increases exposure to a single stock. Always exercise caution, stay well-informed, and consider market conditions and your own risk tolerance before making additional purchases.</p>
     </div>
+    </div><!-- end accordion-body -->
   </div>
 
 </div>
@@ -853,6 +938,20 @@
       toggle.textContent = '☀️';
       localStorage.setItem('theme', 'light');
     }
+  });
+
+  // Accordion
+  function toggleAccordion(btn) {
+    const body = btn.nextElementSibling;
+    const isOpen = btn.classList.contains('open');
+    btn.classList.toggle('open', !isOpen);
+    body.classList.toggle('open', !isOpen);
+  }
+
+  // Open first accordion by default
+  window.addEventListener('DOMContentLoaded', () => {
+    const first = document.querySelector('.accordion-header');
+    if (first) toggleAccordion(first);
   });
 </script>
 </body>
