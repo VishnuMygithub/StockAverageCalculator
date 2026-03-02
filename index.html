@@ -641,6 +641,8 @@
     wrappers.forEach((w, i) => {
       const lbl = w.querySelector('.lot-label');
       if (lbl) lbl.textContent = `${ordinal(i+1)} Purchase`;
+      const btn = w.querySelector('.remove-btn');
+      if (btn) btn.style.visibility = wrappers.length > 2 ? 'visible' : 'hidden';
     });
   }
 
@@ -687,6 +689,8 @@
   }
 
   function removeLot(id) {
+    const wrappers = document.querySelectorAll('.lot-wrapper');
+    if (wrappers.length <= 2) return; // keep at least 2 lots
     const el = document.getElementById(`lot-${id}`);
     if (el) el.remove();
     updateLotLabels();
