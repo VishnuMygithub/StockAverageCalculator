@@ -523,7 +523,7 @@
   <div class="results">
     <div class="result-card main">
       <div class="r-label">Weighted Average Price</div>
-      <div class="r-value" id="avgPrice">₹0.00</div>
+      <div class="r-value" id="avgPrice">0.00</div>
       <div class="r-sub">per share</div>
     </div>
     <div class="result-card">
@@ -620,7 +620,7 @@
 </footer>
 
 <script>
-  let currency = { symbol: '₹', code: 'INR' };
+  let currency = { symbol: '', code: 'INR' };
   let lotCount = 0;
 
   function ordinal(n) {
@@ -647,7 +647,7 @@
       const q = parseFloat(qtyInput.value);
       if (p > 0 && q > 0) {
         const amt = p * q;
-        amountEl.textContent = `${currency.symbol}${amt.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+        amountEl.textContent = amt.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
         amountEl.classList.remove('empty');
       } else {
         amountEl.textContent = '';
@@ -717,9 +717,9 @@
     const avg = totalCost / totalQty;
     const s = currency.symbol;
 
-    document.getElementById('avgPrice').textContent    = `${s}${avg.toFixed(2)}`;
+    document.getElementById('avgPrice').textContent    = avg.toFixed(2);
     document.getElementById('totalUnits').textContent  = totalQty.toLocaleString();
-    document.getElementById('totalInvested').textContent = `${s}${totalCost.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+    document.getElementById('totalInvested').textContent = totalCost.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
 
     // Lot breakdown
     const breakdown = document.getElementById('lotBreakdown');
@@ -732,13 +732,13 @@
       row.innerHTML = `
         <div>
           <div style="font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.25rem;">${ordinal(lot.index)} Purchase</div>
-          <div style="font-size:0.8rem;color:var(--text);font-family:'DM Mono',monospace;">${s}${lot.price.toFixed(2)} × ${lot.qty.toLocaleString()} shares</div>
+          <div style="font-size:0.8rem;color:var(--text);font-family:'DM Mono',monospace;">${lot.price.toFixed(2)} × ${lot.qty.toLocaleString()} shares</div>
           <div style="margin-top:0.4rem;height:3px;background:var(--border);border-radius:2px;overflow:hidden;">
             <div style="height:100%;width:${pct}%;background:var(--accent);border-radius:2px;transition:width 0.4s ease;"></div>
           </div>
         </div>
         <div style="text-align:right;">
-          <div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--accent);">${s}${lot.amount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--accent);">${lot.amount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
           <div style="font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">${pct}% of total</div>
         </div>
       `;
@@ -750,7 +750,7 @@
   function reset() {
     document.getElementById('lots').innerHTML = '';
     lotCount = 0;
-    document.getElementById('avgPrice').textContent    = `${currency.symbol}0.00`;
+    document.getElementById('avgPrice').textContent    = '0.00';
     document.getElementById('totalUnits').textContent  = '—';
     document.getElementById('totalInvested').textContent = '—';
     document.getElementById('errMsg').style.display = 'none';
