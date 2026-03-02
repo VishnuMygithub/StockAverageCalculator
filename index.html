@@ -84,40 +84,6 @@
       max-width: 580px;
     }
 
-    /* ── Currency ── */
-    .currency-row {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1.75rem;
-      flex-wrap: wrap;
-    }
-
-    .currency-btn {
-      flex: 1;
-      min-width: 70px;
-      padding: 0.5rem 0.75rem;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--surface2);
-      color: var(--muted);
-      font-family: 'DM Mono', monospace;
-      font-size: 0.82rem;
-      cursor: pointer;
-      transition: all 0.18s;
-      text-align: center;
-    }
-
-    .currency-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .currency-btn.active {
-      background: var(--accent-glow);
-      border-color: var(--accent);
-      color: var(--accent);
-      font-weight: 500;
-    }
 
     /* ── Section Label ── */
     .section-label {
@@ -491,6 +457,37 @@
     .callout p strong {
       color: var(--label) !important;
     }
+
+    /* ── Clock ── */
+    .clock-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.9rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0.3rem 0.9rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--text);
+      letter-spacing: 0.04em;
+    }
+
+    .clock-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+      animation: pulse 1.5s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
   </style>
 </head>
 <body>
@@ -499,18 +496,13 @@
   <div class="badge">📈 Equity Tool</div>
   <h1>Stock Average Calculator</h1>
   <p class="subtitle">Compute your weighted average cost per share across multiple purchase lots.</p>
+  <div class="clock-wrap">
+    <span class="clock-dot"></span>
+    <span id="liveClock"></span>
+  </div>
 </header>
 
 <div class="card">
-
-  <!-- Currency -->
-  <div class="section-label">Currency</div>
-  <div class="currency-row" id="currencyRow">
-    <button class="currency-btn active" data-symbol="₹" data-code="INR">₹ INR</button>
-    <button class="currency-btn" data-symbol="$" data-code="USD">$ USD</button>
-    <button class="currency-btn" data-symbol="€" data-code="EUR">€ EUR</button>
-    <button class="currency-btn" data-symbol="£" data-code="GBP">£ GBP</button>
-  </div>
 
   <!-- Lots -->
   <div class="section-label">Purchase Lots</div>
@@ -767,20 +759,18 @@
     addLot(); addLot();
   }
 
-  // Currency buttons
-  document.getElementById('currencyRow').addEventListener('click', e => {
-    const btn = e.target.closest('.currency-btn');
-    if (!btn) return;
-    document.querySelectorAll('.currency-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currency = { symbol: btn.dataset.symbol, code: btn.dataset.code };
-    document.getElementById('avgPrice').textContent = `${currency.symbol}0.00`;
-    document.getElementById('totalUnits').textContent = '—';
-    document.getElementById('totalInvested').textContent = '—';
-  });
-
   // Init with 2 lots
   addLot(); addLot();
+
+  // Live clock
+  function updateClock() {
+    const now = new Date();
+    const time = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+    const date = now.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    document.getElementById('liveClock').textContent = `${date}  •  ${time}`;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
 </script>
 </body>
 </html>
