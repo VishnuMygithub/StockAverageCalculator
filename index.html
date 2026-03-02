@@ -1,93 +1,491 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Average Calculator</title>
-    <style>
-        body {
-            background: linear-gradient(135deg, #9b59b6, #8e44ad);
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            max-width: 400px;
-            margin: 50px auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            background: #3498db;
-            color: white;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #2980b9;
-        }
-        .history {
-            margin-top: 20px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stock Average Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Spline+Sans+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f2eb;
+    --card: #fffdf7;
+    --border: #e2ddd3;
+    --ink: #1a1810;
+    --muted: #8a8070;
+    --accent: #c8440a;
+    --accent2: #1a6e3c;
+    --accent-light: rgba(200,68,10,0.08);
+    --green-light: rgba(26,110,60,0.08);
+    --shadow: 0 2px 20px rgba(26,24,16,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(200,68,10,0.04) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(26,110,60,0.04) 0%, transparent 50%);
+    min-height: 100vh;
+    font-family: 'Syne', sans-serif;
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2.5rem 1rem 4rem;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; opacity: 0.4;
+  }
+
+  .wrapper { width: 100%; max-width: 560px; position: relative; z-index: 1; }
+
+  /* Header */
+  header { text-align: center; margin-bottom: 2.5rem; animation: slideDown 0.6s ease both; }
+  header .tag {
+    display: inline-block; padding: 0.3rem 0.9rem;
+    border: 1px solid var(--border); border-radius: 20px;
+    font-family: 'Spline Sans Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 1rem;
+    background: var(--card);
+  }
+  header h1 {
+    font-size: clamp(2rem, 6vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+  header h1 span { color: var(--accent); }
+  header p {
+    margin-top: 0.7rem;
+    font-size: 0.88rem; font-weight: 400;
+    color: var(--muted); line-height: 1.6;
+  }
+
+  /* Card */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    animation: fadeUp 0.5s ease both;
+  }
+
+  /* Purchase lots */
+  .lots-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 1.2rem;
+  }
+  .lots-header h2 { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); }
+
+  #lots-container { display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .lot-row {
+    display: grid; grid-template-columns: auto 1fr 1fr auto;
+    gap: 0.6rem; align-items: center;
+    animation: fadeUp 0.25s ease both;
+  }
+  .lot-num {
+    font-family: 'Spline Sans Mono', monospace;
+    font-size: 0.72rem; color: var(--muted);
+    min-width: 22px; text-align: center;
+  }
+
+  .input-wrap { position: relative; }
+  .input-wrap .prefix {
+    position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%);
+    font-family: 'Spline Sans Mono', monospace;
+    font-size: 0.8rem; color: var(--muted); pointer-events: none;
+  }
+  .input-wrap input {
+    width: 100%;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.65rem 0.75rem 0.65rem 1.8rem;
+    font-family: 'Spline Sans Mono', monospace;
+    font-size: 0.9rem; font-weight: 500;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .input-wrap input::placeholder { color: #c0b9af; font-weight: 300; }
+  .input-wrap input:focus {
+    border-color: var(--accent);
+    background: #fff;
+  }
+  .input-wrap .label {
+    display: block; font-size: 0.65rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--muted); margin-bottom: 0.3rem;
+  }
+
+  .remove-btn {
+    background: none; border: 1.5px solid var(--border);
+    color: var(--muted); border-radius: 8px;
+    width: 32px; height: 32px; cursor: pointer;
+    font-size: 1rem; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; flex-shrink: 0; align-self: flex-end; margin-bottom: 2px;
+  }
+  .remove-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+  .add-btn {
+    width: 100%; margin-top: 1rem;
+    background: none; border: 1.5px dashed var(--border);
+    border-radius: 10px; padding: 0.65rem;
+    font-family: 'Syne', sans-serif; font-size: 0.82rem; font-weight: 600;
+    color: var(--muted); cursor: pointer; transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .add-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+  /* Divider */
+  .divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+
+  /* Buttons */
+  .btn-group { display: grid; grid-template-columns: 1fr auto; gap: 0.7rem; }
+  .calc-btn {
+    background: var(--accent); color: #fff;
+    border: none; border-radius: 12px;
+    padding: 0.85rem 1.5rem;
+    font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .calc-btn:hover { background: #a8360a; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(200,68,10,0.3); }
+  .calc-btn:active { transform: translateY(0); }
+  .clear-btn {
+    background: none; border: 1.5px solid var(--border);
+    border-radius: 12px; padding: 0.85rem 1.2rem;
+    font-family: 'Syne', sans-serif; font-size: 0.82rem; font-weight: 600;
+    color: var(--muted); cursor: pointer; transition: all 0.2s;
+  }
+  .clear-btn:hover { border-color: var(--muted); color: var(--ink); }
+
+  /* Result */
+  .result-section {
+    margin-top: 1.5rem;
+    display: none;
+    animation: fadeUp 0.35s ease both;
+  }
+  .result-section.show { display: block; }
+
+  .result-main {
+    background: var(--ink);
+    border-radius: 16px; padding: 1.8rem;
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .result-main::before {
+    content: '';
+    position: absolute; top: -40px; right: -40px;
+    width: 160px; height: 160px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(200,68,10,0.3), transparent 70%);
+  }
+  .result-main::after {
+    content: '';
+    position: absolute; bottom: -50px; left: -30px;
+    width: 130px; height: 130px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(26,110,60,0.25), transparent 70%);
+  }
+  .result-label {
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.14em; color: rgba(255,255,255,0.45);
+    margin-bottom: 0.5rem; position: relative; z-index: 1;
+  }
+  .result-avg {
+    font-size: clamp(2.4rem, 8vw, 3.2rem);
+    font-weight: 800; color: #fff; line-height: 1;
+    position: relative; z-index: 1;
+    letter-spacing: -0.02em;
+  }
+  .result-avg .currency { font-size: 0.5em; opacity: 0.6; vertical-align: super; }
+  .result-sub {
+    margin-top: 0.5rem;
+    font-family: 'Spline Sans Mono', monospace;
+    font-size: 0.75rem; color: rgba(255,255,255,0.4);
+    position: relative; z-index: 1;
+  }
+
+  .result-stats {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0.7rem; margin-top: 0.7rem;
+  }
+  .stat-box {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1rem 1.1rem;
+  }
+  .stat-box .stat-label {
+    font-size: 0.65rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.3rem;
+  }
+  .stat-box .stat-val {
+    font-family: 'Spline Sans Mono', monospace;
+    font-size: 1.1rem; font-weight: 500; color: var(--ink);
+  }
+
+  /* Breakdown */
+  .breakdown {
+    margin-top: 0.7rem;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+  }
+  .breakdown-header {
+    padding: 0.7rem 1rem;
+    font-size: 0.65rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    display: grid; grid-template-columns: auto 1fr 1fr 1fr;
+    gap: 0.5rem;
+  }
+  .breakdown-row {
+    display: grid; grid-template-columns: auto 1fr 1fr 1fr;
+    gap: 0.5rem; padding: 0.65rem 1rem;
+    font-family: 'Spline Sans Mono', monospace;
+    font-size: 0.8rem; border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .breakdown-row:last-child { border-bottom: none; }
+  .breakdown-row:hover { background: var(--card); }
+  .breakdown-row .lot-badge {
+    background: var(--border); border-radius: 4px;
+    padding: 0.1rem 0.4rem; font-size: 0.65rem;
+    color: var(--muted); display: inline-block;
+  }
+  .breakdown-row .weight-bar-wrap {
+    grid-column: 1 / -1; padding: 0 0 0.3rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .weight-bar {
+    height: 3px; border-radius: 2px;
+    background: var(--accent); transition: width 0.5s ease;
+  }
+  .weight-pct {
+    font-size: 0.65rem; color: var(--muted);
+  }
+
+  /* Currency selector */
+  .currency-row {
+    display: flex; gap: 0.5rem; margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .curr-btn {
+    padding: 0.3rem 0.8rem; border-radius: 20px;
+    border: 1.5px solid var(--border); background: none;
+    font-family: 'Syne', sans-serif; font-size: 0.78rem; font-weight: 600;
+    color: var(--muted); cursor: pointer; transition: all 0.2s;
+  }
+  .curr-btn.active {
+    background: var(--ink); color: #fff; border-color: var(--ink);
+  }
+
+  /* Animations */
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Footer */
+  footer {
+    margin-top: 2rem; text-align: center;
+    font-size: 0.75rem; color: var(--muted);
+    font-family: 'Spline Sans Mono', monospace;
+  }
+
+  @media (max-width: 480px) {
+    .lot-row { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .lot-num, .remove-btn { display: none; }
+    .btn-group { grid-template-columns: 1fr; }
+    .result-stats { grid-template-columns: 1fr 1fr; }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>Stock Average Calculator</h1>
-        <input type="number" id="shares" placeholder="Shares" required>
-        <input type="number" id="price" placeholder="Price per Share" required>
-        <button onclick="addTransaction()">Add Transaction</button>
-        <div class="history" id="history"></div>
-        <div id="summary"></div>
+<div class="wrapper">
+
+  <header>
+    <div class="tag">📈 Equity Tool</div>
+    <h1>Stock <span>Average</span><br>Calculator</h1>
+    <p>Compute your weighted average cost per share across multiple purchase lots.</p>
+  </header>
+
+  <div class="card">
+    <!-- Currency -->
+    <div class="currency-row" id="curr-row">
+      <button class="curr-btn active" onclick="setCurrency('₹','INR')">₹ INR</button>
+      <button class="curr-btn" onclick="setCurrency('$','USD')">$ USD</button>
+      <button class="curr-btn" onclick="setCurrency('€','EUR')">€ EUR</button>
+      <button class="curr-btn" onclick="setCurrency('£','GBP')">£ GBP</button>
     </div>
 
-    <script>
-        function addTransaction() {
-            const shares = document.getElementById('shares').value;
-            const price = document.getElementById('price').value;
-            if (shares && price) {
-                const transaction = { shares: Number(shares), price: Number(price) };
-                saveTransaction(transaction);
-                updateHistory();
-                calculateSummary();
-            }
-        }
+    <!-- Lots -->
+    <div class="lots-header">
+      <h2>Purchase Lots</h2>
+    </div>
+    <div id="lots-container"></div>
+    <button class="add-btn" onclick="addLot()">+ Add Purchase Lot</button>
 
-        function saveTransaction(transaction) {
-            let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-            transactions.push(transaction);
-            localStorage.setItem('transactions', JSON.stringify(transactions));
-        }
+    <div class="divider"></div>
 
-        function updateHistory() {
-            const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-            const historyDiv = document.getElementById('history');
-            historyDiv.innerHTML = '<h3>Transaction History</h3>';
-            transactions.forEach((t, index) => {
-                historyDiv.innerHTML += `<p>${index + 1}: ${t.shares} shares at $${t.price.toFixed(2)}</p>`;
-            });
-        }
+    <div class="btn-group">
+      <button class="calc-btn" onclick="calculate()">Calculate Average ▶</button>
+      <button class="clear-btn" onclick="resetAll()">Reset</button>
+    </div>
 
-        function calculateSummary() {
-            const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-            const totalShares = transactions.reduce((sum, t) => sum + t.shares, 0);
-            const totalCost = transactions.reduce((sum, t) => sum + (t.shares * t.price), 0);
-            const averagePrice = totalShares > 0 ? totalCost / totalShares : 0;
-            document.getElementById('summary').innerHTML = `<h3>Summary</h3><p>Total Shares: ${totalShares}</p><p>Average Price: $${averagePrice.toFixed(2)}</p>`;
-        }
+    <!-- Result -->
+    <div class="result-section" id="result-section">
+      <div class="result-main">
+        <div class="result-label">Weighted Average Price</div>
+        <div class="result-avg"><span class="currency" id="res-curr">₹</span><span id="res-avg">0.00</span></div>
+        <div class="result-sub" id="res-sub">per share</div>
+      </div>
+      <div class="result-stats">
+        <div class="stat-box">
+          <div class="stat-label">Total Units</div>
+          <div class="stat-val" id="res-units">—</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Total Invested</div>
+          <div class="stat-val" id="res-invested">—</div>
+        </div>
+      </div>
+      <div class="breakdown" id="breakdown"></div>
+    </div>
+  </div>
 
-        document.addEventListener('DOMContentLoaded', updateHistory);
-    </script>
+  <footer>Built with HTML · CSS · JS &nbsp;·&nbsp; No data is sent anywhere</footer>
+</div>
+
+<script>
+  let lotCount = 0;
+  let currSymbol = '₹';
+  let lots = [];
+
+  function setCurrency(sym, code) {
+    currSymbol = sym;
+    document.querySelectorAll('.curr-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    document.querySelectorAll('.prefix').forEach(p => p.textContent = sym);
+    document.getElementById('res-curr').textContent = sym;
+  }
+
+  function addLot(units = '', price = '') {
+    lotCount++;
+    const id = lotCount;
+    lots.push(id);
+
+    const container = document.getElementById('lots-container');
+    const div = document.createElement('div');
+    div.className = 'lot-row';
+    div.id = `lot-${id}`;
+    div.innerHTML = `
+      <span class="lot-num">#${id}</span>
+      <div class="input-wrap">
+        <label class="label">Units</label>
+        <span class="prefix">Q</span>
+        <input type="number" id="units-${id}" placeholder="100" min="0.01" step="any" value="${units}" />
+      </div>
+      <div class="input-wrap">
+        <label class="label">Price / Share</label>
+        <span class="prefix">${currSymbol}</span>
+        <input type="number" id="price-${id}" placeholder="500" min="0.01" step="any" value="${price}" />
+      </div>
+      <button class="remove-btn" onclick="removeLot(${id})" title="Remove lot">×</button>
+    `;
+    container.appendChild(div);
+  }
+
+  function removeLot(id) {
+    const rows = document.querySelectorAll('.lot-row');
+    if (rows.length <= 1) return;
+    const el = document.getElementById(`lot-${id}`);
+    if (el) el.remove();
+    lots = lots.filter(l => l !== id);
+  }
+
+  function calculate() {
+    const rows = document.querySelectorAll('.lot-row');
+    let totalInvested = 0, totalUnits = 0;
+    let lotData = [];
+    let hasError = false;
+
+    rows.forEach(row => {
+      const id = row.id.split('-')[1];
+      const u = parseFloat(document.getElementById(`units-${id}`)?.value);
+      const p = parseFloat(document.getElementById(`price-${id}`)?.value);
+      if (!u || !p || u <= 0 || p <= 0 || isNaN(u) || isNaN(p)) { hasError = true; return; }
+      totalInvested += u * p;
+      totalUnits += u;
+      lotData.push({ id, units: u, price: p, invested: u * p });
+    });
+
+    if (hasError || totalUnits === 0) {
+      // Shake effect
+      const card = document.querySelector('.card');
+      card.style.animation = 'none'; card.offsetHeight;
+      card.style.transform = 'translateX(-6px)';
+      setTimeout(() => { card.style.transform = 'translateX(6px)'; }, 60);
+      setTimeout(() => { card.style.transform = 'translateX(0)'; }, 120);
+      return;
+    }
+
+    const avg = totalInvested / totalUnits;
+
+    // Show result
+    document.getElementById('res-avg').textContent = fmt(avg);
+    document.getElementById('res-curr').textContent = currSymbol;
+    document.getElementById('res-units').textContent = fmtUnits(totalUnits);
+    document.getElementById('res-invested').textContent = currSymbol + fmt(totalInvested);
+    document.getElementById('res-sub').textContent = `${lotData.length} lot${lotData.length > 1 ? 's' : ''} · weighted average`;
+
+    // Breakdown
+    const bd = document.getElementById('breakdown');
+    bd.innerHTML = `
+      <div class="breakdown-header">
+        <span>Lot</span><span>Units</span><span>Price</span><span>Amount</span>
+      </div>
+      ${lotData.map((l, i) => `
+        <div class="breakdown-row">
+          <span class="lot-badge">#${i+1}</span>
+          <span>${fmtUnits(l.units)}</span>
+          <span>${currSymbol}${fmt(l.price)}</span>
+          <span>${currSymbol}${fmt(l.invested)}</span>
+          <div class="weight-bar-wrap">
+            <div class="weight-bar" style="width:${(l.invested/totalInvested*100).toFixed(1)}%"></div>
+            <span class="weight-pct">${(l.invested/totalInvested*100).toFixed(1)}% weight</span>
+          </div>
+        </div>
+      `).join('')}
+    `;
+
+    const section = document.getElementById('result-section');
+    section.classList.remove('show');
+    void section.offsetWidth;
+    section.classList.add('show');
+    section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function resetAll() {
+    document.getElementById('lots-container').innerHTML = '';
+    document.getElementById('result-section').classList.remove('show');
+    lotCount = 0; lots = [];
+    addLot(); addLot();
+  }
+
+  function fmt(n) {
+    return parseFloat(n.toFixed(2)).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function fmtUnits(n) {
+    return parseFloat(n.toFixed(4)).toLocaleString('en-IN');
+  }
+
+  // Init
+  addLot(100, 500);
+  addLot(150, 400);
+</script>
 </body>
 </html>
