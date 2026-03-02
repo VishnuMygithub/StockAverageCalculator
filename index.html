@@ -133,8 +133,45 @@
     #lots {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 1rem;
       margin-bottom: 1rem;
+    }
+
+    .lot-wrapper {
+      animation: fadeIn 0.2s ease;
+    }
+
+    .lot-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.4rem;
+    }
+
+    .lot-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .lot-amount {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent);
+      background: var(--accent-glow);
+      border: 1px solid rgba(0,214,143,0.2);
+      border-radius: 6px;
+      padding: 0.15rem 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .lot-amount.empty {
+      color: var(--muted);
+      background: transparent;
+      border-color: transparent;
+      font-size: 0;
     }
 
     .lot {
@@ -142,7 +179,6 @@
       grid-template-columns: 1fr 1fr auto;
       gap: 0.6rem;
       align-items: center;
-      animation: fadeIn 0.2s ease;
     }
 
     @keyframes fadeIn {
@@ -508,6 +544,12 @@
     </div>
   </div>
 
+  <!-- Per-lot breakdown -->
+  <div id="lotBreakdown" style="display:none; margin-top:1rem;">
+    <div class="section-label" style="margin-top:0.5rem;">Amount Invested per Purchase</div>
+    <div id="lotBreakdownList" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
+  </div>
+
 </div>
 
 <!-- Info Section -->
@@ -589,43 +631,88 @@
   let currency = { symbol: '₹', code: 'INR' };
   let lotCount = 0;
 
+  function ordinal(n) {
+    const s = ['th','st','nd','rd'], v = n % 100;
+    return n + (s[(v-20)%10] || s[v] || s[0]);
+  }
+
+  function updateLotLabels() {
+    const wrappers = document.querySelectorAll('.lot-wrapper');
+    wrappers.forEach((w, i) => {
+      const lbl = w.querySelector('.lot-label');
+      if (lbl) lbl.textContent = `${ordinal(i+1)} Purchase`;
+    });
+  }
+
+  function attachLiveCalc(wrapper) {
+    const priceInput = wrapper.querySelector('.price-input');
+    const qtyInput   = wrapper.querySelector('.qty-input');
+    const amountEl   = wrapper.querySelector('.lot-amount');
+    function recalc() {
+      const p = parseFloat(priceInput.value);
+      const q = parseFloat(qtyInput.value);
+      if (p > 0 && q > 0) {
+        const amt = p * q;
+        amountEl.textContent = `${currency.symbol}${amt.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+        amountEl.classList.remove('empty');
+      } else {
+        amountEl.textContent = '';
+        amountEl.classList.add('empty');
+      }
+    }
+    priceInput.addEventListener('input', recalc);
+    qtyInput.addEventListener('input', recalc);
+  }
+
   function addLot() {
     lotCount++;
     const id = lotCount;
-    const div = document.createElement('div');
-    div.className = 'lot';
-    div.id = `lot-${id}`;
-    div.innerHTML = `
-      <input type="number" min="0" step="any" placeholder="Price per share" class="price-input" />
-      <input type="number" min="0" step="any" placeholder="No. of shares" class="qty-input" />
-      <button class="remove-btn" onclick="removeLot(${id})" title="Remove">✕</button>
+    const wrapper = document.createElement('div');
+    wrapper.className = 'lot-wrapper';
+    wrapper.id = `lot-${id}`;
+    wrapper.innerHTML = `
+      <div class="lot-header">
+        <span class="lot-label"></span>
+        <span class="lot-amount empty"></span>
+      </div>
+      <div class="lot">
+        <input type="number" min="0" step="any" placeholder="Price per share" class="price-input" />
+        <input type="number" min="0" step="any" placeholder="No. of shares" class="qty-input" />
+        <button class="remove-btn" onclick="removeLot(${id})" title="Remove">✕</button>
+      </div>
     `;
-    document.getElementById('lots').appendChild(div);
+    document.getElementById('lots').appendChild(wrapper);
+    attachLiveCalc(wrapper);
+    updateLotLabels();
   }
 
   function removeLot(id) {
     const el = document.getElementById(`lot-${id}`);
     if (el) el.remove();
+    updateLotLabels();
   }
 
   function calculate() {
-    const lots = document.querySelectorAll('.lot');
+    const wrappers = document.querySelectorAll('.lot-wrapper');
     let totalCost = 0, totalQty = 0, valid = true;
+    const lotData = [];
 
-    lots.forEach(lot => {
-      const price = parseFloat(lot.querySelector('.price-input').value);
-      const qty   = parseFloat(lot.querySelector('.qty-input').value);
+    wrappers.forEach((wrapper, i) => {
+      const price = parseFloat(wrapper.querySelector('.price-input').value);
+      const qty   = parseFloat(wrapper.querySelector('.qty-input').value);
       if (isNaN(price) || isNaN(qty) || price <= 0 || qty <= 0) {
         valid = false;
       } else {
-        totalCost += price * qty;
+        const amt = price * qty;
+        totalCost += amt;
         totalQty  += qty;
+        lotData.push({ index: i + 1, price, qty, amount: amt });
       }
     });
 
     const err = document.getElementById('errMsg');
 
-    if (!valid || lots.length === 0) {
+    if (!valid || wrappers.length === 0) {
       err.style.display = 'block';
       return;
     }
@@ -637,6 +724,31 @@
     document.getElementById('avgPrice').textContent    = `${s}${avg.toFixed(2)}`;
     document.getElementById('totalUnits').textContent  = totalQty.toLocaleString();
     document.getElementById('totalInvested').textContent = `${s}${totalCost.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+
+    // Lot breakdown
+    const breakdown = document.getElementById('lotBreakdown');
+    const list = document.getElementById('lotBreakdownList');
+    list.innerHTML = '';
+    lotData.forEach(lot => {
+      const pct = ((lot.amount / totalCost) * 100).toFixed(1);
+      const row = document.createElement('div');
+      row.style.cssText = 'display:grid; grid-template-columns:1fr auto; align-items:center; background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:0.7rem 1rem; gap:0.5rem;';
+      row.innerHTML = `
+        <div>
+          <div style="font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.25rem;">${ordinal(lot.index)} Purchase</div>
+          <div style="font-size:0.8rem;color:var(--text);font-family:'DM Mono',monospace;">${s}${lot.price.toFixed(2)} × ${lot.qty.toLocaleString()} shares</div>
+          <div style="margin-top:0.4rem;height:3px;background:var(--border);border-radius:2px;overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:var(--accent);border-radius:2px;transition:width 0.4s ease;"></div>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--accent);">${s}${lot.amount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+          <div style="font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">${pct}% of total</div>
+        </div>
+      `;
+      list.appendChild(row);
+    });
+    breakdown.style.display = 'block';
   }
 
   function reset() {
@@ -646,6 +758,8 @@
     document.getElementById('totalUnits').textContent  = '—';
     document.getElementById('totalInvested').textContent = '—';
     document.getElementById('errMsg').style.display = 'none';
+    document.getElementById('lotBreakdown').style.display = 'none';
+    document.getElementById('lotBreakdownList').innerHTML = '';
     addLot(); addLot();
   }
 
