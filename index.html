@@ -5,27 +5,89 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stock Average Calculator</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 2px solid #ccc; border-radius: 5px; }
-        input[type='number'], button { margin-top: 10px; width: 100%; padding: 10px; }
+        body {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background: #3498db;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .history {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Stock Average Calculator</h1>
-        <label for="prices">Enter stock prices (comma-separated):</label>
-        <input type="text" id="prices" placeholder="e.g. 100, 150, 200">
-        <button id="calculate">Calculate Average</button>
-        <h2 id="average"></h2>
+        <input type="number" id="shares" placeholder="Shares" required>
+        <input type="number" id="price" placeholder="Price per Share" required>
+        <button onclick="addTransaction()">Add Transaction</button>
+        <div class="history" id="history"></div>
+        <div id="summary"></div>
     </div>
+
     <script>
-        document.getElementById('calculate').onclick = function() {
-            const pricesInput = document.getElementById('prices').value;
-            const prices = pricesInput.split(',').map(price => parseFloat(price)).filter(price => !isNaN(price));
-            const total = prices.reduce((acc, price) => acc + price, 0);
-            const average = prices.length > 0 ? (total / prices.length) : 0;
-            document.getElementById('average').innerText = `Average Stock Price: $${average.toFixed(2)}`;
-        };
+        function addTransaction() {
+            const shares = document.getElementById('shares').value;
+            const price = document.getElementById('price').value;
+            if (shares && price) {
+                const transaction = { shares: Number(shares), price: Number(price) };
+                saveTransaction(transaction);
+                updateHistory();
+                calculateSummary();
+            }
+        }
+
+        function saveTransaction(transaction) {
+            let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+            transactions.push(transaction);
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+        }
+
+        function updateHistory() {
+            const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+            const historyDiv = document.getElementById('history');
+            historyDiv.innerHTML = '<h3>Transaction History</h3>';
+            transactions.forEach((t, index) => {
+                historyDiv.innerHTML += `<p>${index + 1}: ${t.shares} shares at $${t.price.toFixed(2)}</p>`;
+            });
+        }
+
+        function calculateSummary() {
+            const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+            const totalShares = transactions.reduce((sum, t) => sum + t.shares, 0);
+            const totalCost = transactions.reduce((sum, t) => sum + (t.shares * t.price), 0);
+            const averagePrice = totalShares > 0 ? totalCost / totalShares : 0;
+            document.getElementById('summary').innerHTML = `<h3>Summary</h3><p>Total Shares: ${totalShares}</p><p>Average Price: $${averagePrice.toFixed(2)}</p>`;
+        }
+
+        document.addEventListener('DOMContentLoaded', updateHistory);
     </script>
 </body>
 </html>
