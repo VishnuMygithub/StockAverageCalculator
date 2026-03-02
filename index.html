@@ -7,20 +7,38 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet"/>
   <style>
     :root {
-      --bg:        #0d1117;
-      --surface:   #161b22;
-      --surface2:  #1c2230;
-      --border:    #30363d;
-      --accent:    #00d68f;
-      --accent-dim:#00a36c;
+      --bg:          #0d1117;
+      --surface:     #161b22;
+      --surface2:    #1c2230;
+      --border:      #30363d;
+      --accent:      #00d68f;
+      --accent-dim:  #00a36c;
       --accent-glow: rgba(0,214,143,0.15);
-      --red:       #f85149;
-      --text:      #e6edf3;
-      --muted:     #8b949e;
-      --label:     #58a6ff;
+      --red:         #f85149;
+      --text:        #e6edf3;
+      --muted:       #8b949e;
+      --label:       #58a6ff;
+    }
+
+    :root.light {
+      --bg:          #f4f6f9;
+      --surface:     #ffffff;
+      --surface2:    #eef1f5;
+      --border:      #d0d7e2;
+      --accent:      #00a36c;
+      --accent-dim:  #007a50;
+      --accent-glow: rgba(0,163,108,0.12);
+      --red:         #cf3831;
+      --text:        #1a2133;
+      --muted:       #64748b;
+      --label:       #2563eb;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body, .card, .info-card, .result-card, .lot input, .currency-btn, .btn, .clock-wrap {
+      transition: background 0.25s, border-color 0.25s, color 0.25s, box-shadow 0.25s;
+    }
 
     body {
       font-family: 'Sora', sans-serif;
@@ -33,6 +51,7 @@
       padding: 2rem 1rem 4rem;
       background-image:
         radial-gradient(ellipse 80% 40% at 50% -10%, rgba(0,214,143,0.08) 0%, transparent 70%);
+      transition: background 0.3s, color 0.3s;
     }
 
     /* ── Header ── */
@@ -61,7 +80,18 @@
       font-size: clamp(1.6rem, 4vw, 2.4rem);
       font-weight: 700;
       letter-spacing: -0.03em;
+      color: var(--text);
+    }
+
+    :root:not(.light) h1 {
       background: linear-gradient(135deg, #e6edf3 30%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    :root.light h1 {
+      background: linear-gradient(135deg, var(--text) 40%, var(--accent));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -458,6 +488,32 @@
       color: var(--label) !important;
     }
 
+
+    /* ── Theme Toggle ── */
+    .theme-toggle {
+      position: fixed;
+      top: 1.2rem;
+      right: 1.2rem;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--accent);
+      transform: rotate(20deg) scale(1.08);
+    }
     /* ── Clock ── */
     .clock-wrap {
       display: inline-flex;
@@ -491,6 +547,8 @@
   </style>
 </head>
 <body>
+
+<button class="theme-toggle" id="themeToggle" title="Toggle theme">🌙</button>
 
 <header>
   <div class="badge">📈 Equity Tool</div>
@@ -771,6 +829,31 @@
   }
   updateClock();
   setInterval(updateClock, 1000);
+
+  // Theme toggle
+  const toggle = document.getElementById('themeToggle');
+  const root = document.documentElement;
+  let isDark = true;
+
+  // Check saved preference
+  if (localStorage.getItem('theme') === 'light') {
+    root.classList.add('light');
+    toggle.textContent = '☀️';
+    isDark = false;
+  }
+
+  toggle.addEventListener('click', () => {
+    isDark = !isDark;
+    if (isDark) {
+      root.classList.remove('light');
+      toggle.textContent = '🌙';
+      localStorage.setItem('theme', 'dark');
+    } else {
+      root.classList.add('light');
+      toggle.textContent = '☀️';
+      localStorage.setItem('theme', 'light');
+    }
+  });
 </script>
 </body>
 </html>
