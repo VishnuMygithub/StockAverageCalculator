@@ -326,6 +326,135 @@
     }
 
     footer span { color: var(--border); margin: 0 0.4rem; }
+
+    /* ── Info Section ── */
+    .info-section {
+      width: 100%;
+      max-width: 580px;
+      margin-top: 2rem;
+    }
+
+    .info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem 1.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .info-card h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .info-card h2 .icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--accent-glow);
+      border: 1px solid rgba(0,214,143,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .info-card p {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.75;
+      font-weight: 300;
+    }
+
+    .info-card p strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* Steps */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      margin-top: 0.25rem;
+    }
+
+    .step {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      background: var(--accent-glow);
+      border: 1px solid rgba(0,214,143,0.3);
+      color: var(--accent);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .step-body {
+      flex: 1;
+    }
+
+    .step-body strong {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.2rem;
+    }
+
+    .step-body p {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* Callout */
+    .callout {
+      display: flex;
+      gap: 0.85rem;
+      align-items: flex-start;
+      background: rgba(88,166,255,0.07);
+      border: 1px solid rgba(88,166,255,0.2);
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      margin-top: 1.25rem;
+    }
+
+    .callout-icon {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .callout p {
+      font-size: 0.82rem !important;
+      color: var(--muted) !important;
+      line-height: 1.6 !important;
+      margin: 0 !important;
+    }
+
+    .callout p strong {
+      color: var(--label) !important;
+    }
   </style>
 </head>
 <body>
@@ -376,6 +505,77 @@
     <div class="result-card">
       <div class="r-label">Total Invested</div>
       <div class="r-value" id="totalInvested" style="font-size:1.5rem; color: var(--text)">—</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Info Section -->
+<div class="info-section">
+
+  <div class="info-card">
+    <h2><span class="icon">📖</span> What is the Stock Average Calculator?</h2>
+    <p>
+      The Stock Average Calculator is a valuable tool for investors looking to manage their portfolio effectively.
+      It calculates your <strong>weighted average cost per share</strong> across multiple purchase lots, giving you
+      a clear picture of your actual cost basis — and helping you make smarter decisions about when and how much to buy.
+    </p>
+  </div>
+
+  <div class="info-card">
+    <h2><span class="icon">💡</span> Why Use It?</h2>
+    <p>
+      As an investor, you may encounter situations where a stock's price moves <strong>contrary to your expectations</strong>.
+      For example, say you bought Reliance stocks anticipating an upward trend — but the market moves downward.
+      If your conviction in the stock remains strong, you can strategically <strong>buy more shares at the lower price</strong>
+      to bring down your average cost per share. This approach is known as <strong>averaging down</strong>, and this
+      calculator makes it precise and effortless.
+    </p>
+  </div>
+
+  <div class="info-card">
+    <h2><span class="icon">🪜</span> How to Use</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Input Purchase Prices</strong>
+          <p>Enter the price per share and number of shares for each time you bought the stock. Add as many purchase lots as needed.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Calculate Average Price</strong>
+          <p>Hit <em>Calculate Average</em> — the tool computes the weighted average price across all your purchase lots instantly.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Make an Informed Decision</strong>
+          <p>Compare the calculated average to the current market price. If the market is below your average, consider if buying more makes sense for your strategy.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <strong>Reduce Your Average Price</strong>
+          <p>By buying additional shares at a lower price, your new weighted average drops — reducing the price target needed to break even or turn a profit.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <strong>Review the Updated Output</strong>
+          <p>The calculator shows your new weighted average, total units held, and total capital invested — giving you a complete picture of your position.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-icon">⚠️</div>
+      <p><strong>A word of caution:</strong> Averaging down can be a powerful strategy, but it also increases exposure to a single stock. Always exercise caution, stay well-informed, and consider market conditions and your own risk tolerance before making additional purchases.</p>
     </div>
   </div>
 
